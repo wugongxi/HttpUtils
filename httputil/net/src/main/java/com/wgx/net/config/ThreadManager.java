@@ -1,4 +1,4 @@
-package net.config;
+package com.wgx.net.config;
 
 import android.os.Handler;
 import android.os.HandlerThread;

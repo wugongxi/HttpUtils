@@ -1,10 +1,11 @@
-package net.callback;
+package com.wgx.net.callback.callBackHelper;
 
 import android.os.Handler;
 import android.util.Log;
 
 
-import net.NetWorkUtil;
+import com.wgx.net.NetWorkUtil;
+import com.wgx.net.callback.OnDownLoadListener;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -53,7 +54,7 @@ public class DownloadHelper implements Callback {
         Handler handler = NetWorkUtil.getInstance().getHandler();
         try {
             final long total = response.body().contentLength();
-            Log.e(TAG, "total------>" + total);
+//            Log.e(TAG, "total------>" + total);
             long current = 0;
             is = response.body().byteStream();
             fos = new FileOutputStream(file);
@@ -63,7 +64,7 @@ public class DownloadHelper implements Callback {
             while ((len = is.read(buf)) != -1) {
                 current += len;
                 fos.write(buf, 0, len);
-                Log.e(TAG, "current------>" + current);
+//                Log.e(TAG, "current------>" + current);
                 fos.flush();
                 final long finalCurrent = current;
                 handler.post(new Runnable() {

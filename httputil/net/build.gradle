@@ -63,11 +63,11 @@ artifacts {
 
 // 你只需要把这里的参数修改为自己的库名称即可
 ext {
-    siteUrl = 'https://github.com/211685568/networkutil'
-    gitUrl = 'https://github.com/211685568/networkutil.git'
-    currentVersion = '0.1.8'//0.0.8 ->0.1.8
-    groupId = 'top.wgx.odyssey'
-    artifactId = 'networkutil'
+    siteUrl = 'https://github.com/211685568/HttpUtils'
+    gitUrl = 'https://github.com/211685568/HttpUtils.git'
+    currentVersion = '0.0.2'//0.0.8 ->0.1.8
+    groupId = 'top.wgx.util'
+    artifactId = 'httputils'
     desc = 'Android networkutil'
 }
 

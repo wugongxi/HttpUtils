@@ -1,11 +1,20 @@
-package net.config;
+package com.wgx.net.config;
 
+
+import android.app.Application;
+import android.content.Context;
+import android.util.Log;
+
+import com.google.gson.Gson;
+import com.wgx.net.cache.CacheType;
+import com.wgx.net.intercept.LoggerInterceptor;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.HostnameVerifier;
@@ -17,15 +26,17 @@ import okhttp3.Cache;
 import okhttp3.Call;
 import okhttp3.Cookie;
 import okhttp3.CookieJar;
+import okhttp3.Dispatcher;
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 
 /**
  * Created by BM-WGX on 2017/2/16.
  *
- * @serial
- * <p>
+ * @serial <p>
  * HttpClientBuilder.getInstance()
  * getHttpClienBuilder()
  * OkHttpClient.Builder mBuilder;
@@ -35,29 +46,49 @@ public class HttpClientBuilder {
     private Map<String, List<String>> mheader = null;
     private List<Interceptor> mInterceptors = null;
     private List<Interceptor> mNetInterceptors = null;
-    private Map<Object, Object> mParms = null;
+    private Map<String, Object> mParms = null;
     private String start = "{";
     private String end = "}";
+    private Application app;
     private SSLSocketFactory sSLSocketFactory;
     private X509TrustManager trustManager;
 
-    private long READ_TIME_OUT = 15*1000;
-    private long CONNECTION_TIME_OUT =  15*1000;
-    private long WRITE_TIME_OUT =  15*1000;
-    private OkHttpClient.Builder mBuilder;
-    private static HttpClientBuilder sBuilder;
+    private long READ_TIME_OUT = 15 * 1000;
+    private long CONNECTION_TIME_OUT = 15 * 1000;
+    private long WRITE_TIME_OUT = 15 * 1000;
+    private static HttpClientBuilder sBuilder = null;
     private File cachedir = null;
     private int cacheSize = 10 * 1024 * 1024;
     private boolean isDebug = false;
     private String defaultMethod = Method.get;
 
-    public HttpClientBuilder(Map<String, List<String>> mheader, List<Interceptor> interceptors, Map<Object, Object> mParms, long READ_TIME_OUT, long CONNECTION_TIME_OUT, long WRITE_TIME_OUT) {
+    private boolean DEBUG = true;
+    private OkHttpClient client = null;
+    private Gson gson;
+    private MediaType mediaType = MultipartBody.FORM;
+
+    private int maxCachedSize = 5 * 1024 * 1024;
+    private File cachedDir;
+    private Context context;
+    private List<Interceptor> networkInterceptors;
+    private List<Interceptor> interceptors;
+    private int cacheType = CacheType.NETWORK_ELSE_CACHED;
+    private boolean isGzip = false;
+    private long timeOut = 5000;
+    private boolean debug = false;
+
+
+    public HttpClientBuilder(Map<String, List<String>> mheader, List<Interceptor> interceptors, Map<String, Object> mParms, long READ_TIME_OUT, long CONNECTION_TIME_OUT, long WRITE_TIME_OUT) {
         this.mheader = mheader;
         this.mInterceptors = interceptors;
         this.mParms = mParms;
         this.READ_TIME_OUT = READ_TIME_OUT;
         this.CONNECTION_TIME_OUT = CONNECTION_TIME_OUT;
         this.WRITE_TIME_OUT = WRITE_TIME_OUT;
+    }
+
+    public Cache provideCache() {
+        return new Cache(app.getCacheDir(), 10240 * 1024);
     }
 
     public String getStart() {
@@ -68,73 +99,77 @@ public class HttpClientBuilder {
         return end;
     }
 
-    public void setStart(String start) {
+    public HttpClientBuilder setStart(String start) {
         this.start = start;
+        return this;
     }
 
-    public void setEnd(String end) {
+    public HttpClientBuilder setEnd(String end) {
         this.end = end;
+        return this;
     }
 
-    public static HttpClientBuilder getInstance() {
+
+    public static HttpClientBuilder init(Context context) {
         if (sBuilder == null) {
             synchronized (HttpClientBuilder.class) {
                 if (sBuilder == null) {
-                    sBuilder = new HttpClientBuilder();
+                    sBuilder = new HttpClientBuilder(context);
                 }
             }
         }
         return sBuilder;
     }
 
-    public void setsSLSocketFactory(SSLSocketFactory sSLSocketFactory) {
-        this.sSLSocketFactory = sSLSocketFactory;
+
+    public static HttpClientBuilder getInstance() {
+        return sBuilder;
     }
 
-    public void setTrustManager(X509TrustManager trustManager) {
+    public HttpClientBuilder setsSLSocketFactory(SSLSocketFactory sSLSocketFactory) {
+        this.sSLSocketFactory = sSLSocketFactory;
+        return this;
+    }
+
+    public HttpClientBuilder setTrustManager(X509TrustManager trustManager) {
         this.trustManager = trustManager;
+        return this;
     }
 
     public OkHttpClient getHttpClien() {
-        if (mBuilder == null) {
-            getHttpClienBuilder();
+        if (client == null) {
+            client = getHttpClienBuilder().build();
         }
-        return mBuilder.build().newBuilder().build();
+        return client;
     }
+
     public OkHttpClient.Builder getNewHttpClien() {
         return new OkHttpClient.Builder();
     }
 
     private OkHttpClient.Builder getHttpClienBuilder() {
-        if (mBuilder == null) {
-            synchronized (HttpClientBuilder.class) {
-                if (mBuilder == null) {
-                    mBuilder = new OkHttpClient.Builder();
-                }
-            }
-
-        }
-        return mBuilder;
+        return new OkHttpClient.Builder();
     }
 
     /**
      * set default request type @{@link Method}
+     *
      * @param method default Method.get;
      * @return
      */
-    public HttpClientBuilder setDefaultMethod(String method){
+    public HttpClientBuilder setDefaultMethod(String method) {
         defaultMethod = method;
         return this;
     }
 
 
-    public HttpClientBuilder() {
+    public HttpClientBuilder(Context context) {
+        this.context = context;
         mheader = new HashMap<>();
-        mCancels = new HashMap<>();
+        mCancels = new ArrayList<>();
         mInterceptors = new ArrayList<>();
         mNetInterceptors = new ArrayList<>();
         mParms = new HashMap<>();
-        getHttpClienBuilder();
     }
 
     public Map<String, List<String>> getheader() {
@@ -186,7 +221,7 @@ public class HttpClientBuilder {
         return this;
     }
 
-    public Map<Object, Object> getParms() {
+    public Map<String, Object> getParms() {
         return mParms;
     }
 
@@ -205,6 +240,11 @@ public class HttpClientBuilder {
         return this;
     }
 
+    public HttpClientBuilder setenableCache(String cachedir, int cacheSize) {
+        this.cacheSize = cacheSize;
+        return this;
+    }
+
     public int getCacheSize() {
         return cacheSize;
     }
@@ -214,15 +254,19 @@ public class HttpClientBuilder {
     }
 
     public void builder() {
+        OkHttpClient.Builder httpClienBuilder = getHttpClienBuilder();
         for (Interceptor i : mInterceptors
                 ) {
-            getHttpClienBuilder().addInterceptor(i);
+            httpClienBuilder.addInterceptor(i);
+        }
+        if (isDebug){
+            httpClienBuilder.addNetworkInterceptor(new LoggerInterceptor());
         }
         for (Interceptor i : mNetInterceptors
                 ) {
-            getHttpClienBuilder().addInterceptor(i);
+            httpClienBuilder.addInterceptor(i);
         }
-        getHttpClienBuilder()
+        httpClienBuilder
                 .readTimeout(READ_TIME_OUT, TimeUnit.MILLISECONDS)
                 .writeTimeout(WRITE_TIME_OUT, TimeUnit.MILLISECONDS)
                 .connectTimeout(CONNECTION_TIME_OUT, TimeUnit.MILLISECONDS)
@@ -233,10 +277,10 @@ public class HttpClientBuilder {
                     }
                 }).followRedirects(true);
         if (cachedir != null) {
-            getHttpClienBuilder().cache(new Cache(cachedir, cacheSize));
+            httpClienBuilder.cache(new Cache(cachedir, cacheSize));
         }
 
-        getHttpClienBuilder().cookieJar(new CookieJar() {
+        httpClienBuilder.cookieJar(new CookieJar() {
             @Override
             public void saveFromResponse(HttpUrl url, List<Cookie> cookies) {
 
@@ -248,14 +292,17 @@ public class HttpClientBuilder {
             }
         });
         if (sSLSocketFactory != null && trustManager != null) {
-            mBuilder.sslSocketFactory(sSLSocketFactory, trustManager);
+            httpClienBuilder.sslSocketFactory(sSLSocketFactory, trustManager);
         }
-
+        client = httpClienBuilder.build();
     }
-    public HttpClientBuilder setDebug(boolean isdebug){
+
+    public HttpClientBuilder setDebug(boolean isdebug) {
         this.isDebug = isdebug;
         return this;
-    };
+    }
+
+    ;
 
     public boolean isDebug() {
         return isDebug;
@@ -266,31 +313,22 @@ public class HttpClientBuilder {
     }
 
 
-    HashMap<Object, Integer> mCancels;
+    private List<Object> mCancels;
 
-    public synchronized void ModifyCancels(Object o, Call call) {
-        if (call==null) {
-            cancelCall(o);
-        } else {
-            removeCall(o,call);
+    public void cancelCall(Object tag) {
+        Log.e("---cancelCall -------",mCancels.size()+"--"+mCancels.toString());
+        if(!mCancels.contains(tag)) {
+            mCancels.add(tag);
         }
     }
 
-    private void cancelCall(Object tag) {
-        Integer integer = mCancels.get(tag);
-        mCancels.put(tag, integer != null ? integer++ : 1);
-    }
-
-    private void removeCall(Object tag, Call call) {
-        Integer integer = mCancels.get(tag);
-        if (integer != null) {
-            if (integer >= 1) {
-                mCancels.put(tag, integer--);
-                return;
-            }
-            mCancels.remove(tag);
-        }else {
+    public void checkCall(Call call) {
+        Log.e("---checkCall -------",mCancels.size()+"--"+mCancels.toString());
+        if (mCancels.contains(call.request().tag())){
             call.cancel();
         }
+     if (client.dispatcher().queuedCallsCount()<1){
+         mCancels.clear();
+     }
     }
 }

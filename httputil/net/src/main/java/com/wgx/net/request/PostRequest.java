@@ -1,9 +1,10 @@
-package net.request;
+package com.wgx.net.request;
 
 
 import java.io.File;
 import java.util.Map;
 
+import okhttp3.CacheControl;
 import okhttp3.FormBody;
 import okhttp3.Headers;
 import okhttp3.MediaType;
@@ -21,6 +22,10 @@ public class PostRequest extends BaseRequest<PostRequest> {
         return new PostRequest();
     }
 
+    public PostRequest() {
+        super();
+    }
+
     public PostRequest setTag(Object tag) {
         this.tag = tag;
         return this;
@@ -32,15 +37,28 @@ public class PostRequest extends BaseRequest<PostRequest> {
         return this;
     }
 
-    public PostRequest addParam(Object key, Object value) {
+    public PostRequest param(Object key, Object value) {
         this.mPamer.put(key, value);
         return this;
+    }
+
+    @Override
+    public PostRequest rmParam(Object key) {
+        mPamer.remove(key);
+        return this;
+    }
+
+    @Override
+    public PostRequest rmHeader(String key) {
+        mHander.removeAll(key);
+        return null;
     }
 
     public PostRequest addHeader(String key, Object value) {
         this.mHander.add(key, String.valueOf(value));
         return this;
     }
+
 
     private static final MediaType MEDIA_TYPE_JSON = MediaType.parse("application/json; charset=utf-8");
     public PostRequest postJson(String json) {
@@ -88,7 +106,7 @@ public class PostRequest extends BaseRequest<PostRequest> {
 
 
     @Override
-    protected Request buildData(Map<Object, Object> mPamer, Headers.Builder mHander, Object tag) {
+    protected Request buildData(Map<Object, Object> mPamer, Headers.Builder mHander, CacheControl control, Object tag) {
         if (mRequestBody == null) {
             FormBody.Builder formBody = new FormBody.Builder();
             if (mPamer != null && mPamer.size() > 0) {
@@ -100,9 +118,12 @@ public class PostRequest extends BaseRequest<PostRequest> {
             mRequestBody = formBody.build();
         }
         Request.Builder builder = new Request.Builder().url(url).post(mRequestBody);
-
+        builder.cacheControl(CacheControl.FORCE_NETWORK);
         if (mHander != null) {
             builder.headers(mHander.build());
+        }
+        if (control!=null){
+            builder.cacheControl(control);
         }
         if (tag != null) {
             builder.tag(tag);

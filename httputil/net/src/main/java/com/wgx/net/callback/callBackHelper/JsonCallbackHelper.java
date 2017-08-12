@@ -1,4 +1,4 @@
-package net.callback;
+package com.wgx.net.callback.callBackHelper;
 
 /**
  * Created by WU on 2017/6/16.
@@ -8,9 +8,10 @@ package net.callback;
 import android.os.Handler;
 
 import com.google.gson.Gson;
-import com.google.gson.internal.Streams;
 
-import net.NetWorkUtil;
+import com.wgx.net.NetWorkUtil;
+import com.wgx.net.callback.CallBack;
+import com.wgx.net.callback.JCallBack;
 
 import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
@@ -23,11 +24,11 @@ import okhttp3.Response;
  * Created by wangjitao on 15/10/16.
  */
 
-public class JsonCallback<T> extends ABSCallBack<T> {
-    FinalCallBack<T> callback;
+public class JsonCallbackHelper<T> extends CallBack<T> {
+    JCallBack<T> callback;
 
-    public JsonCallback(FinalCallBack<T> callBack) {
-        this.callback = callBack;
+    public JsonCallbackHelper(JCallBack<T> JCallBack) {
+        this.callback = JCallBack;
     }
 
 

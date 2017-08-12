@@ -1,4 +1,4 @@
-package net.config;
+package com.wgx.net.config;
 
 /**
  * Created by WU on 2017/6/7.

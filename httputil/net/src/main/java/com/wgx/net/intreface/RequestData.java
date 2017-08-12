@@ -1,9 +1,8 @@
-package net.intreface;
+package com.wgx.net.intreface;
 
 
 
-import net.CallBackX;
-import net.config.HttpClientBuilder;
+import com.wgx.net.config.HttpClientBuilder;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,10 +33,6 @@ public class RequestData {
     private String url;
     private String method = "GET";
 
-    public void execute(CallBackX backX){
-
-    }
-
     Response builder() {
 
         Request build = new Request.Builder().url(url).tag(tag).build();
@@ -50,7 +45,7 @@ public class RequestData {
     }
 
     void builder(Callback callback) {
-        Request build = new Request.Builder().build();
-        HttpClientBuilder.getInstance().getHttpClien().newCall(build).enqueue(callback);
+//        Request build = new Request.Builder().build();
+//        HttpClientBuilder.getInstance().getHttpClien().newCall(build).enqueue(callback);
     }
 }

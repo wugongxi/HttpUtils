@@ -1,12 +1,13 @@
-package net.request;
+package com.wgx.net.request;
 
 
+import com.wgx.net.LogUtil;
 
-import net.config.HttpClientBuilder;
-
-import java.util.HashMap;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Map;
 
+import okhttp3.CacheControl;
 import okhttp3.Headers;
 import okhttp3.Request;
 
@@ -16,26 +17,13 @@ import okhttp3.Request;
 
 public class GetRequest extends BaseRequest<GetRequest>{
 
-
-
-    protected String url = "";
-    protected Object tag = null;
-    protected Map<Object,Object> mPamer= new HashMap<>();
-    private static Headers.Builder mHander = new Headers.Builder();
-
-
-
-
-
-    private static GetRequest sGetRequest  =null;
-
     public static GetRequest getInstance() {
-        if (sGetRequest==null){
-            sGetRequest = new GetRequest();
-        }
-        return sGetRequest;
+        return new GetRequest();
     }
 
+    public GetRequest() {
+        super();
+    }
 
     public GetRequest setTag(Object tag) {
         this.tag = tag;
@@ -48,8 +36,20 @@ public class GetRequest extends BaseRequest<GetRequest>{
         return this;
     }
 
-    public GetRequest addParam(Object key, Object value) {
+    public GetRequest param(Object key, Object value) {
         this.mPamer.put(key,value);
+        return this;
+    }
+
+    @Override
+    public GetRequest rmParam(Object key) {
+        mPamer.remove(key);
+        return this;
+    }
+
+    @Override
+    public GetRequest rmHeader(String key) {
+        mHander.removeAll(key);
         return this;
     }
 
@@ -58,10 +58,10 @@ public class GetRequest extends BaseRequest<GetRequest>{
         return this;
     }
 /*
-    public void builder(AbsCall callback){
+    public void builder(JsonCallBack callback){
         Call call = HttpClientBuilder.getInstance().getHttpClien().newCall(build(this.mPamer, mHander, tag));
         callback.onBefore(call);
-        call.enqueue(new JsonCallback(callback));
+        call.enqueue(new JsonCallbackHelper(callback));
 
     }
 
@@ -73,16 +73,20 @@ public class GetRequest extends BaseRequest<GetRequest>{
 */
 
     @Override
-    protected Request buildData(Map<Object, Object> mPamer, Headers.Builder mHander, Object tag) {
+    protected Request buildData(Map<Object, Object> mPamer, Headers.Builder mHander, CacheControl control, Object tag) {
         if (mPamer!=null&&mPamer.size()>0) {
             StringBuffer sbf = new StringBuffer(url + (url.contains("/") ? "" : "/")).append("?");
             for (Map.Entry<Object, Object> item : mPamer.entrySet()
                     ) {
-                sbf.append(String.valueOf(item.getKey()) + "=" + String.valueOf(item.getValue())).append("&");
+                sbf.append(String.valueOf(item.getKey()) + "=" + getEncode(String.valueOf(item.getValue()))).append("&");
             }
             url = sbf.substring(0, sbf.length() - 1);
         }
         Request.Builder builder = new Request.Builder().url(url).get();
+        if (control!=null){
+            builder.cacheControl(control);
+        }
+
         if (mHander!=null){
             builder.headers(mHander.build());
         }
@@ -91,6 +95,17 @@ public class GetRequest extends BaseRequest<GetRequest>{
         }
         return builder.build();
 
+    }
+
+    private String getEncode(String s) {
+        if (s != null) {
+            try {
+                return URLEncoder.encode(s, "utf-8");
+            } catch (UnsupportedEncodingException e) {
+//                e.printStackTrace();
+            }
+        }
+        return s;
     }
 
 }

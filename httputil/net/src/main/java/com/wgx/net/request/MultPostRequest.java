@@ -1,10 +1,11 @@
-package net.request;
+package com.wgx.net.request;
 
 import android.text.TextUtils;
 
 import java.io.File;
 import java.util.Map;
 
+import okhttp3.CacheControl;
 import okhttp3.Headers;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -24,6 +25,10 @@ public class MultPostRequest extends BaseRequest<MultPostRequest> {
             return new MultPostRequest();
     }
 
+    public MultPostRequest() {
+        super();
+    }
+
     public MultPostRequest setTag(Object tag) {
         this.tag = tag;
         return this;
@@ -35,8 +40,20 @@ public class MultPostRequest extends BaseRequest<MultPostRequest> {
         return this;
     }
 
-    public MultPostRequest addParam(Object key, Object value) {
+    public MultPostRequest param(Object key, Object value) {
         this.mPamer.put(key, value);
+        return this;
+    }
+
+    @Override
+    public MultPostRequest rmParam(Object key) {
+        this.mPamer.remove(key);
+        return this;
+    }
+
+    @Override
+    public MultPostRequest rmHeader(String key) {
+        mHander.removeAll(key);
         return this;
     }
 
@@ -45,9 +62,8 @@ public class MultPostRequest extends BaseRequest<MultPostRequest> {
         return this;
     }
 
-
     @Override
-    protected Request buildData(Map<Object, Object> mPamer, Headers.Builder mHander, Object tag) {
+    protected Request buildData(Map<Object, Object> mPamer, Headers.Builder mHander, CacheControl control, Object tag) {
         MultipartBody.Builder build = new MultipartBody.Builder().setType(MultipartBody.FORM);
         if (mPamer!=null&&mPamer.size()>0) {
             StringBuffer sbf = new StringBuffer(url + ((TextUtils.equals(url.substring(url.length()-1),"/")) ? "" : "/")).append("?");
@@ -63,6 +79,9 @@ public class MultPostRequest extends BaseRequest<MultPostRequest> {
         Request.Builder builder = new Request.Builder().url(url).post(build.build());
         if (mHander!=null){
             builder.headers(mHander.build());
+        }
+        if (control!=null){
+            builder.cacheControl(control);
         }
         if (tag!=null){
             builder.tag(tag);

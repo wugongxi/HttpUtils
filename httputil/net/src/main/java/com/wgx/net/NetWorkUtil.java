@@ -1,25 +1,16 @@
-package net;
+package com.wgx.net;
 
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 
-
-import net.callback.AbsCall;
-import net.callback.OnDownLoadListener;
-import net.config.HttpClientBuilder;
-import net.config.Method;
-import net.config.ThreadManager;
-import net.request.BaseRequest;
-import net.request.GetRequest;
-import net.request.MultPostRequest;
-import net.request.PostRequest;
-
-import java.io.IOException;
-import java.util.Map;
-
-import okhttp3.Call;
-import okhttp3.MediaType;
+import com.wgx.net.config.HttpClientBuilder;
+import com.wgx.net.config.Method;
+import com.wgx.net.config.ThreadManager;
+import com.wgx.net.request.BaseRequest;
+import com.wgx.net.request.GetRequest;
+import com.wgx.net.request.MultPostRequest;
+import com.wgx.net.request.PostRequest;
 
 /**
  * Created by WU on 2017/6/12.
@@ -47,9 +38,6 @@ public class NetWorkUtil {
         return mhandler;
     }
 
-    private static Map<Object, Object> mParms = null;
-    private static Map<Object, Object> mHeader = null;
-
     private static HttpClientBuilder initDefault() {
         return HttpClientBuilder.getInstance();
     }
@@ -74,31 +62,31 @@ public class NetWorkUtil {
     }
 
     public void cancle(Object tag) {
-        HttpClientBuilder.getInstance().ModifyCancels(tag, null);
+        HttpClientBuilder.getInstance().cancelCall(tag);
     }
 
-
-
-    public HttpClientBuilder init(Context app) {
+    static int x = 0;
+    public static HttpClientBuilder init(Context app) {
 //        DBManage.getInstance().init(app);
-        if (app==null){
-            NetWorkUtil.post("").post(MediaType.parse(""),"").builder(new AbsCall<String>() {
+   /**
+        if (x!=0){
+            NetWorkUtil.post("").post(MediaType.parse(""),"").builder(new JCallBack<String>() {
                 @Override
                 public void onSucceed(String s, Call call) {
 
                 }
             });
 
-        NetWorkUtil.post("").addParam("","").addHeader("","").setTag(this);
-        NetWorkUtil.get("").addParam("","").addHeader("","").setTag(this);
-        NetWorkUtil.multPost("").addParam("","").addHeader("","").setTag(this).builder("", new OnDownLoadListener() {
+        NetWorkUtil.post("").param("","").addHeader("","").setTag(this);
+        NetWorkUtil.get("").param("","").addHeader("","").setTag(this);
+        NetWorkUtil.multPost("").param("","").addHeader("","").setTag(this).builder("", new OnDownLoadListener() {
             @Override
             public void onDLoadProgress(long total, long progress, String path) {
                 super.onDLoadProgress(total, progress, path);
             }
 
             @Override
-            public void onSucceed(Object o, Call call) {
+            public void onSucceed(File o, Call call) {
 
             }
 
@@ -113,7 +101,7 @@ public class NetWorkUtil {
             }
         });
         }
-        this.context = app;
-        return HttpClientBuilder.getInstance();
+    */
+        return HttpClientBuilder.init(app);
     }
 }

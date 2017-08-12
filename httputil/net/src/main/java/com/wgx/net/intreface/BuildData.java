@@ -1,8 +1,8 @@
-package net.intreface;
+package com.wgx.net.intreface;
 
 
 
-import net.config.HttpClientBuilder;
+import com.wgx.net.config.HttpClientBuilder;
 
 import java.util.HashMap;
 import java.util.Map;

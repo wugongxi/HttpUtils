@@ -1,5 +1,6 @@
-package net.callback;
+package com.wgx.net.callback;
 
+import java.io.File;
 import java.io.IOException;
 
 import okhttp3.Call;
@@ -8,7 +9,7 @@ import okhttp3.Call;
  * Created by WU on 2017/6/17 0017.
  */
 
-public abstract class OnDownLoadListener implements FinalCallBack {
+public abstract class OnDownLoadListener extends JCallBack<File> {
     public void onstart(String path) {
 
     }
@@ -26,6 +27,10 @@ public abstract class OnDownLoadListener implements FinalCallBack {
 
     }
 
+    @Override
+    public void onSucceed(File file, Call call) {
+
+    }
 
     @Override
     public void onFaild(Call call, IOException e) {

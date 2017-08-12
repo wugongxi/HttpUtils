@@ -1,4 +1,4 @@
-package net.util;
+package com.wgx.net.util;
 
 import java.io.IOException;
 import java.io.InputStream;

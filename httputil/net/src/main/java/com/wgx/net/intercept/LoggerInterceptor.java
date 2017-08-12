@@ -1,4 +1,4 @@
-package net.config;
+package com.wgx.net.intercept;
 
 /**
  * Created by BM-WGX on 2017/2/5.
@@ -21,7 +21,7 @@ import okio.BufferedSource;
 
 public class LoggerInterceptor implements Interceptor {
 
-    public static final String TAG = "NetWorkLogger";
+    public static final String TAG = "httputil";
 
     @Override
     public Response intercept(Chain chain) throws IOException {
