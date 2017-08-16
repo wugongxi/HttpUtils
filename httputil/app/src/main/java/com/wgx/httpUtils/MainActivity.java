@@ -15,14 +15,13 @@ import android.widget.Toast;
 import android.widget.VideoView;
 
 import com.wgx.net.NetWorkUtil;
-import com.wgx.net.callback.BitmapCallBack;
-import com.wgx.net.callback.JCallBack;
 import com.wgx.net.callback.OnDownLoadListener;
 
 import java.io.File;
 import java.io.IOException;
 
 import okhttp3.Call;
+
 
 public class MainActivity extends AppCompatActivity {
     ImageView id_http;
@@ -107,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 //        NetWorkUtil.getInstance().cancle("aaaa");
-        NetWorkUtil.url("http://www.angame.top/res/bean.txt").param("beankey","beanvalue").addHeader("h-bean-key","h-bean-value").setTag("aaaa").builder(new JCallBack<String>() {
+        NetWorkUtil.url("http://www.angame.top/res/bean.txt").param("beankey","beanvalue").rmHeader("hkk").addHeader("h-bean-key","h-bean-value").setTag("aaaa").builder(new JCallBack<String>() {
             @Override
             public void onSucceed(String s, Call call) {
                 tv.setText(s);

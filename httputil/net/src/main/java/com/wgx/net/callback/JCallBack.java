@@ -1,5 +1,6 @@
 package com.wgx.net.callback;
 
+
 import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
