@@ -1,7 +1,5 @@
 package com.wgx.net.cache;
 
-import android.support.annotation.IntDef;
-
 /**
  * Created by dzc on 15/12/5.
  */

@@ -143,12 +143,21 @@ public class HttpClientBuilder {
         return client;
     }
 
+    public OkHttpClient setHttpClien(OkHttpClient okHttpClient) {
+        client = getHttpClienBuilder(okHttpClient).build();
+        return client;
+    }
+
     public OkHttpClient.Builder getNewHttpClien() {
         return new OkHttpClient.Builder();
     }
 
     private OkHttpClient.Builder getHttpClienBuilder() {
         return new OkHttpClient.Builder();
+    }
+
+    private OkHttpClient.Builder getHttpClienBuilder(OkHttpClient client) {
+        return client != null ? client.newBuilder() : new OkHttpClient.Builder();
     }
 
     /**
@@ -256,14 +265,14 @@ public class HttpClientBuilder {
     public void builder() {
         OkHttpClient.Builder httpClienBuilder = getHttpClienBuilder();
         for (Interceptor i : mInterceptors
-                ) {
+        ) {
             httpClienBuilder.addInterceptor(i);
         }
-        if (isDebug){
+        if (isDebug) {
             httpClienBuilder.addNetworkInterceptor(new LoggerInterceptor());
         }
         for (Interceptor i : mNetInterceptors
-                ) {
+        ) {
             httpClienBuilder.addInterceptor(i);
         }
         httpClienBuilder
@@ -316,19 +325,19 @@ public class HttpClientBuilder {
     private List<Object> mCancels;
 
     public void cancelCall(Object tag) {
-        Log.e("---cancelCall -------",mCancels.size()+"--"+mCancels.toString());
-        if(!mCancels.contains(tag)) {
+        Log.e("---cancelCall -------", mCancels.size() + "--" + mCancels.toString());
+        if (!mCancels.contains(tag)) {
             mCancels.add(tag);
         }
     }
 
     public void checkCall(Call call) {
-        Log.e("---checkCall -------",mCancels.size()+"--"+mCancels.toString());
-        if (mCancels.contains(call.request().tag())){
+        Log.e("---checkCall -------", mCancels.size() + "--" + mCancels.toString());
+        if (mCancels.contains(call.request().tag())) {
             call.cancel();
         }
-     if (client.dispatcher().queuedCallsCount()<1){
-         mCancels.clear();
-     }
+        if (client.dispatcher().queuedCallsCount() < 1) {
+            mCancels.clear();
+        }
     }
 }

@@ -15,6 +15,8 @@ import android.widget.Toast;
 import android.widget.VideoView;
 
 import com.wgx.net.NetWorkUtil;
+import com.wgx.net.callback.BitmapCallBack;
+import com.wgx.net.callback.JCallBack;
 import com.wgx.net.callback.OnDownLoadListener;
 
 import java.io.File;
@@ -106,7 +108,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 //        NetWorkUtil.getInstance().cancle("aaaa");
-        NetWorkUtil.url("http://www.angame.top/res/bean.txt").param("beankey","beanvalue").rmHeader("hkk").addHeader("h-bean-key","h-bean-value").setTag("aaaa").builder(new JCallBack<String>() {
+        NetWorkUtil.url("http://angame.top/api/app/user/api.php?api=login&user=wu&pwd=wgx").param("beankey","beanvalue").rmHeader("hkk").addHeader("h-bean-key","h-bean-value").setTag("aaaa").builder(new JCallBack<String>() {
             @Override
             public void onSucceed(String s, Call call) {
                 tv.setText(s);
@@ -119,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.e("----onFaild", "jinud "+(call.isCanceled())+(call.isExecuted()) +e.getMessage());
             }
         });
-        NetWorkUtil.url("http://www.angame.top/res/videos.avi").param("down--a","down--v").addHeader("down-aab", "down--abc").builder(this.getCacheDir() + "/abc.mp4", new OnDownLoadListener() {
+        NetWorkUtil.url("http://f.angame.top/angame/video.mp4").param("down--a","down--v").addHeader("down-aab", "down--abc").builder(this.getCacheDir() + "/abc.mp4", new OnDownLoadListener() {
             @Override
             public void onSucceed(File file, Call call) {
                 super.onSucceed(file, call);
@@ -136,7 +138,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onDFaild(String path, Call call, IOException e) {
                 super.onDFaild(path, call, e);
-                tv_progress.setText("----失败 " + path);
+               runOnUiThread(new Runnable() {
+                   @Override
+                   public void run() {
+                       tv_progress.setText("----失败 " + path);
+                   }
+               });
             }
 
             @Override
@@ -157,7 +164,7 @@ public class MainActivity extends AppCompatActivity {
 //                Log.e("----down", path + "jinud " + total + "--" + progress);
             }
         });
-        NetWorkUtil.getInstance().cancle("aaaa");
+//        NetWorkUtil.getInstance().cancle("aaaa");
     }
 
     Handler mHandler = new Handler(Looper.getMainLooper());

@@ -4,10 +4,12 @@ package com.wgx.net.intercept;
  * Created by BM-WGX on 2017/2/5.
  */
 
+import android.os.Build;
 import android.util.Log;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import okhttp3.Interceptor;
 import okhttp3.MediaType;
@@ -17,6 +19,7 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 import okhttp3.internal.Util;
 import okio.BufferedSource;
+
 
 
 public class LoggerInterceptor implements Interceptor {
@@ -74,7 +77,10 @@ public class LoggerInterceptor implements Interceptor {
 //            e.printStackTrace();
         }
         okio.Buffer buffer = source.buffer();
-        Charset charset = Util.UTF_8;
+        Charset charset = Charset.forName("UTF-8");
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+            charset = StandardCharsets.UTF_8;
+        }
         MediaType contentType = responseBody.contentType();
         if (contentType != null&&contentType.charset()!=null) {
             charset = contentType.charset();
